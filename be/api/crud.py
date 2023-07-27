@@ -2,7 +2,8 @@ import urllib.parse
 from datetime import datetime
 import random
 import time
-
+import re
+import json
 import aiohttp
 import requests
 from bs4 import BeautifulSoup
@@ -75,55 +76,33 @@ async def crawl_taobao(keyWord: str):
     }
 
     url = f"https://s.taobao.com/search?q={urllib.parse.quote(keyWord)}"
-
+    counter = 1
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers, cookies=cookie_parameters) as resp:
             content = await resp.text()
             soup = BeautifulSoup(content, "html.parser")
-            # print(soup)
-            time.sleep(random.random() * 2)
-            # product_elements = soup.find_all("div", class_="mainsrp-itemlist")
-            print(soup)
-            # for element in product_elements:
-            #     # Lấy thông tin sản phẩm và thêm vào product_list
-            #     # Ví dụ: product_list.append(...)
-            #     pass
-        # try:
-        #     async with session.get(url, headers=headers) as resp:
-        #
-        #         if resp.status != 200:
-        #             return {"error": f"bad status code {resp.status}"}
-        #
-        #         soup = BeautifulSoup(await resp.text(), "html.parser")
-        #
-        #         product_elements = soup.find_all("div", class_="items")
-        #         print(product_elements)
-                # for product_element in product_elements:
-                #     product_info = {"stt": id}
-                #     id += 1
-                #
-                #     name_element = product_element.find("h3", class_="pro-name")
-                #     if name_element:
-                #         product_info["name"] = name_element.text.strip()
-                #     else:
-                #         product_info["name"] = None
-                #     price_element = product_element.find("span", class_="p-compare")
-                #     if price_element:
-                #         product_info["price"] = price_element.text.strip().replace(",", "").replace("₫", "")
-                #     else:
-                #         product_info["price"] = None
-                #     link_element = product_element.find("a")
-                #     if link_element:
-                #         href = link_element.get('href')
-                #         product_info["link"] = "https://www.guardian.com.vn" + href
-                #         product_info["id"] = href
-                #     else:
-                #         product_info["link"] = None
-                #     product_list.append(product_info)
-
-
-        # except aiohttp.ClientError as e:
-        #     return e
-        # finally:
-        #     await session.close()
+            script_tags = soup.find_all("script")
+        for script_tag in script_tags:
+            script_content = script_tag.string
+            if script_content and "g_page_config" in script_content:
+                start_index = script_content.find("g_page_config =")
+                end_index = script_content.find("}};")
+                json_content = script_content[start_index + 15 : end_index +2]
+                try:
+                    g_page_config_json = json.loads(json_content)
+                    data = g_page_config_json['mods']['itemlist']['data']['auctions']
+                    print(len(data))
+                    for item in data:
+                        objectDto = {
+                            'id': counter,
+                            'name': item['raw_title'],
+                            'link': item['detail_url'],
+                            'price': item['view_price'],
+                            'shopName': item['shopName'],
+                            # 'crawl_time': object.crawl_time
+                        }
+                        counter +=1
+                        product_list.append(objectDto)
+                except json.JSONDecodeError as e:
+                    print(e)
     return product_list
