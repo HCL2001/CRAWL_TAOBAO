@@ -15,6 +15,8 @@ import models
 import schemas
 from database import SessionLocal, engine
 from security import verify_password, generate_token, validate_token, check_token_expired
+from googletrans import *
+import constant
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -49,6 +51,12 @@ def get_db():
 
 @app.get("/search/{keyWord}")
 async def search_taobao(keyWord: str):
+    # translator = Translator()
+    # # Chuyển tất cả về tiếng Anh để việc dịch gần đúng nhất
+    # keyWordTranslateFirst = translator.translate(keyWord, dest=constant.ENGLISH).text
+    # keyWordTranslateSecond = translator.translate(keyWordTranslateFirst, dest=constant.CHINESE).text
+    # print(keyWordTranslateFirst)
+    # print(keyWordTranslateSecond)
     return await crud.crawl_taobao(keyWord)
 
 
