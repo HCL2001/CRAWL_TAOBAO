@@ -13,9 +13,12 @@ from sqlalchemy.orm import Session
 import config
 import models
 import schemas
+from googletrans import *
+import constant
 
 
 async def crawl_taobao(keyWord: str):
+    transaletor = Translator()
     product_list = []
     cookie_parameters = {
         'JSESSIONID': 'A3F2A600D89A337421C303832ED25962',
@@ -96,9 +99,11 @@ async def crawl_taobao(keyWord: str):
                         objectDto = {
                             'id': counter,
                             'name': item['raw_title'],
+                            'translateName': transaletor.translate(item['raw_title'], dest=constant.VIETNAMESE).text,
                             'link': item['detail_url'],
                             'price': item['view_price'],
                             'shopName': item['shopName'],
+                            'shopNameTranslate': transaletor.translate(item['shopName'], dest=constant.VIETNAMESE).text,
                             # 'crawl_time': object.crawl_time
                         }
                         counter +=1
