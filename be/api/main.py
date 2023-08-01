@@ -2,6 +2,7 @@ import subprocess
 from datetime import datetime
 from typing import Optional
 
+import googletrans
 import jwt
 from croniter import croniter
 from crontab import CronTab
@@ -51,12 +52,9 @@ def get_db():
 
 @app.get("/search/{keyWord}")
 async def search_taobao(keyWord: str):
-    # translator = Translator()
-    # # Chuyển tất cả về tiếng Anh để việc dịch gần đúng nhất
-    # keyWordTranslateFirst = translator.translate(keyWord, dest=constant.ENGLISH).text
-    # keyWordTranslateSecond = translator.translate(keyWordTranslateFirst, dest=constant.CHINESE).text
-    # print(keyWordTranslateFirst)
-    # print(keyWordTranslateSecond)
-    return await crud.crawl_taobao(keyWord)
+    translator = Translator()
+    keyWordTranslateSecond = translator.translate(keyWord, src=constant.VIETNAMESE, dest=constant.CHINESE).text
+    print(keyWordTranslateSecond)
+    return await crud.crawl_taobao(keyWordTranslateSecond)
 
 

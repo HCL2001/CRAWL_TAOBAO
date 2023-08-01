@@ -2,4 +2,4 @@
 
 VIETNAMESE = 'vi'
 ENGLISH = 'en'
-CHINESE = "zh-CN"
+CHINESE = "zh-cn"
