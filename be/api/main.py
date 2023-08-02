@@ -58,3 +58,7 @@ async def search_taobao(keyWord: str):
     return await crud.crawl_taobao(keyWordTranslateSecond)
 
 
+@app.post("login")
+async def login():
+    return await login
+
